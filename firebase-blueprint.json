@@ -1,0 +1,81 @@
+{
+  "entities": {
+    "Lancamento": {
+      "title": "Lançamento",
+      "description": "Registro de uma aposta ou operação de trading esportivo.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "uid": { "type": "string", "description": "ID do usuário proprietário." },
+        "data": { "type": "string", "format": "date-time" },
+        "esporte": { "type": "string" },
+        "liga": { "type": "string" },
+        "timeCasa": { "type": "string" },
+        "timeFora": { "type": "string" },
+        "eventoManual": { "type": "string" },
+        "mercado": { "type": "string" },
+        "odd": { "type": "number" },
+        "stake": { "type": "number" },
+        "resultado": { "type": "string", "enum": ["green", "red", "void", "half-green", "half-red"] },
+        "lucroLiquido": { "type": "number" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "uid", "data", "odd", "stake", "resultado", "lucroLiquido"]
+    },
+    "AgendaItem": {
+      "title": "Item de Agenda",
+      "description": "Evento ou lembrete na agenda do usuário.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "uid": { "type": "string", "description": "ID do usuário proprietário." },
+        "data": { "type": "string", "format": "date-time" },
+        "titulo": { "type": "string" },
+        "comentario": { "type": "string" },
+        "lembrete": { "type": "boolean" },
+        "diasAntecedencia": { "type": "number" },
+        "horarioLembrete": { "type": "string" },
+        "quantidadeLembretes": { "type": "number" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "uid", "data", "titulo"]
+    },
+    "UserProfile": {
+      "title": "Perfil do Usuário",
+      "description": "Configurações e perfil do usuário.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "displayName": { "type": "string" },
+        "email": { "type": "string" },
+        "photoURL": { "type": "string" },
+        "bancaInicial": { "type": "number" },
+        "notifSettings": {
+          "type": "object",
+          "properties": {
+            "global": { "type": "boolean" },
+            "dias": { "type": "number" },
+            "horario": { "type": "string" },
+            "quantidade": { "type": "number" }
+          }
+        },
+        "lastLogin": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "email"]
+    }
+  },
+  "firestore": {
+    "users/{uid}": {
+      "schema": "UserProfile",
+      "description": "Documento de perfil do usuário."
+    },
+    "users/{uid}/lancamentos/{lancamentoId}": {
+      "schema": "Lancamento",
+      "description": "Coleção de lançamentos do usuário."
+    },
+    "users/{uid}/agenda/{agendaId}": {
+      "schema": "AgendaItem",
+      "description": "Coleção de itens da agenda do usuário."
+    }
+  }
+}

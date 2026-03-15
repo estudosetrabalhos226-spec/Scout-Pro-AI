@@ -1,0 +1,131 @@
+// ===============================================================
+// Assumed Data Model
+// ===============================================================
+//
+// Collection: users/{uid}
+// Fields:
+//   - uid: string (required)
+//   - displayName: string
+//   - email: string (required)
+//   - photoURL: string
+//   - bancaInicial: number
+//   - notifSettings: map
+//   - lastLogin: string
+//
+// Collection: users/{uid}/lancamentos/{lancamentoId}
+// Fields:
+//   - id: string (required)
+//   - uid: string (required)
+//   - data: string (required)
+//   - esporte: string
+//   - liga: string
+//   - timeCasa: string
+//   - timeFora: string
+//   - eventoManual: string
+//   - mercado: string
+//   - odd: number (required)
+//   - stake: number (required)
+//   - resultado: string (required)
+//   - lucroLiquido: number (required)
+//   - createdAt: string
+//
+// Collection: users/{uid}/agenda/{agendaId}
+// Fields:
+//   - id: string (required)
+//   - uid: string (required)
+//   - data: string (required)
+//   - titulo: string (required)
+//   - comentario: string
+//   - lembrete: boolean
+//   - diasAntecedencia: number
+//   - horarioLembrete: string
+//   - quantidadeLembretes: number
+//   - createdAt: string
+//
+// ===============================================================
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+    
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function hasOnlyAllowedFields(fields) {
+      return request.resource.data.keys().hasOnly(fields);
+    }
+
+    function isValidEmail(email) {
+      return email is string && email.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$");
+    }
+
+    // ===============================================================
+    // Domain Validators
+    // ===============================================================
+
+    function isValidUser(data) {
+      return data.email is string && isValidEmail(data.email) &&
+             (data.displayName == null || (data.displayName is string && data.displayName.size() < 100)) &&
+             (data.bancaInicial == null || data.bancaInicial is number) &&
+             (data.notifSettings == null || data.notifSettings is map) &&
+             (data.createdAt == null || data.createdAt is timestamp);
+    }
+
+    function isValidLancamento(data) {
+      return data.data is string &&
+             data.odd is number &&
+             data.stake is number &&
+             data.resultado in ["Green", "Red", "Void", "Meio Green", "Meio Red"] &&
+             data.lucroLiquido is number &&
+             (data.evento == null || (data.evento is string && data.evento.size() < 200)) &&
+             (data.mercado == null || (data.mercado is string && data.mercado.size() < 100)) &&
+             (data.competicao == null || (data.competicao is string && data.competicao.size() < 100)) &&
+             (data.createdAt == null || data.createdAt is timestamp);
+    }
+
+    function isValidAgendaItem(data) {
+      return data.data is string &&
+             data.titulo is string && data.titulo.size() > 0 && data.titulo.size() < 200 &&
+             (data.comentario == null || (data.comentario is string && data.comentario.size() < 1000)) &&
+             (data.createdAt == null || data.createdAt is timestamp);
+    }
+
+    // ===============================================================
+    // Rules
+    // ===============================================================
+
+    match /users/{uid} {
+      allow read: if isOwner(uid);
+      allow create: if isOwner(uid) && isValidUser(request.resource.data);
+      allow update: if isOwner(uid) && isValidUser(request.resource.data);
+      
+      match /lancamentos/{lancamentoId} {
+        allow read: if isOwner(uid);
+        allow create: if isOwner(uid) && isValidLancamento(request.resource.data);
+        allow update: if isOwner(uid) && isValidLancamento(request.resource.data);
+        allow delete: if isOwner(uid);
+      }
+
+      match /agenda/{agendaId} {
+        allow read: if isOwner(uid);
+        allow create: if isOwner(uid) && isValidAgendaItem(request.resource.data);
+        allow update: if isOwner(uid) && isValidAgendaItem(request.resource.data);
+        allow delete: if isOwner(uid);
+      }
+    }
+
+    // Default deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

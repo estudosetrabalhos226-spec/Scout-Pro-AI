@@ -1,0 +1,47 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+  --color-brand-bg: #212121;
+  --color-brand-card: #2d2d2d;
+  --color-brand-accent: #00e676;
+  --color-brand-danger: #ff5252;
+}
+
+@layer base {
+  body {
+    @apply bg-brand-bg text-gray-100 font-sans antialiased;
+  }
+
+  .form-input {
+    @apply w-full bg-white text-black text-sm font-semibold rounded-lg border-2 border-gray-300 focus:border-brand-accent block p-2.5 transition-all outline-none;
+  }
+  
+  /* Ensure select options are also readable and have black text */
+  select.form-input, select.form-input option {
+    @apply text-black bg-white;
+    color: #000000 !important;
+  }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  /* Professional Report Styling */
+  .markdown-body h1 { @apply text-2xl font-black text-brand-accent mb-8 mt-4 uppercase tracking-tighter border-b border-brand-accent/20 pb-4; }
+  .markdown-body h2 { @apply text-xl font-bold text-white/90 mb-6 mt-12 flex items-center gap-2; }
+  .markdown-body h3 { @apply text-lg font-bold text-white/80 mb-4 mt-8; }
+  .markdown-body p { @apply text-white/60 leading-relaxed mb-6; }
+  .markdown-body ul, .markdown-body ol { @apply mb-8 space-y-2 ml-4; }
+  .markdown-body li { @apply text-white/70; }
+  .markdown-body table { @apply w-full mb-10 border-collapse bg-black/20 rounded-xl overflow-hidden; }
+  .markdown-body th { @apply bg-white/5 p-3 text-left text-[10px] font-bold uppercase tracking-widest text-white/40 border-b border-white/5; }
+  .markdown-body td { @apply p-3 text-sm border-b border-white/5 text-white/80; }
+  .markdown-body hr { @apply border-white/5 my-12; }
+}
